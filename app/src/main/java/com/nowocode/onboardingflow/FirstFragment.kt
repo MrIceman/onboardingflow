@@ -38,7 +38,7 @@ class FirstFragment : Fragment() {
             .setActivity(requireActivity())
             .addOnboardingFeature(
                 view.findViewById(R.id.textview_first),
-                "Check that frigging cool text view!",
+                "Check that frigging cool text view! It's so cool!!!",
                 null,
                 MessagePosition.BOTTOM
             )
@@ -58,9 +58,6 @@ class FirstFragment : Fragment() {
                 requireActivity().findViewById<androidx.appcompat.widget.Toolbar>(
                     R.id.toolbar
                 ), "Oh, select this amazing toolBAR", null, MessagePosition.BOTTOM
-            )
-            .addOnboardingFeature(
-                requireActivity().findViewById(R.),
             )
             .start()
     }

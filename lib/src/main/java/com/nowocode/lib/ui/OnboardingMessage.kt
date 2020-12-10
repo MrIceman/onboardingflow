@@ -69,17 +69,61 @@ class OnboardingMessage : FrameLayout {
             backgroundPaint
         )
 
-        val textRect = Rect()
+            canvas?.let {
+                drawContent(it)
+            }
+    }
 
-        titlePaint.getTextBounds(title, 0, title.length, textRect)
+    private fun isTextWiderThanScreen(text: String, paint: Paint): Boolean {
+        val measuredTextWidth = paint.measureText(text)
+        return measuredTextWidth > (width - 2 * PADDING_IN_DP)
+    }
 
-        canvas?.drawText(
-            this.title,
-            width / 2 - titlePaint.measureText(this.title) / 2 - PADDING_IN_DP,
-            PADDING_IN_DP * 4,
-            titlePaint
+    private fun drawContent(canvas: Canvas) {
+        if (isTextWiderThanScreen(this.title, titlePaint)) {
+            // we need to break the title down into multipe lines
+            val textParts = mutableListOf<String>()
+            var tempStringHolder = ""
+            this.title.split(" ")
+                .map { titleWord ->
+                    if (!isTextWiderThanScreen(tempStringHolder, titlePaint))
+                        tempStringHolder += "$titleWord "
+                    else {
+                        // text is too long
+                        textParts.add(tempStringHolder)
+                        tempStringHolder = ""
+                    }
+                }
+            if (tempStringHolder != "") {
+                textParts.add("$tempStringHolder ")
+                tempStringHolder = ""
+            }
+            var currentDrawnTextLine = 0
+            val textRect = Rect()
+            textParts.forEach { textPart ->
+                titlePaint.getTextBounds(
+                    textPart,
+                    0,
+                    textPart.length,
+                    textRect
+                )
+                canvas.drawText(
+                    textPart,
+                    width / 2 - titlePaint.measureText(this.title) / 2 - PADDING_IN_DP,
+                    PADDING_IN_DP * 4 + currentDrawnTextLine * (textRect.bottom + (PADDING_IN_DP / currentDrawnTextLine)),
+                    titlePaint
+                )
 
-        )
+                currentDrawnTextLine++
+            }
+        } else {
+            canvas.drawText(
+                this.title,
+                width / 2 - titlePaint.measureText(this.title) / 2 - PADDING_IN_DP,
+                PADDING_IN_DP * 4,
+                titlePaint
+            )
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

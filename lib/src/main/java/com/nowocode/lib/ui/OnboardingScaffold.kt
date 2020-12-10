@@ -7,6 +7,7 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.core.view.contains
 import com.nowocode.lib.ui.model.MessagePosition
 import com.nowocode.lib.ui.model.OnboardingAction
 
@@ -116,7 +117,8 @@ internal class OnboardingScaffold : FrameLayout {
         }
 
         canvas?.drawBitmap(screenBitMap, 0f, 0f, Paint())
-        removeAllViews()
+        /** TODO This should not happen within onDraw as this causes a recursion */
+        removeView(onboardingMessage)
         addView(onboardingMessage, onBoardingMessageLayoutParams)
         onboardingMessage.translationY = dialogTopY
     }

@@ -42,7 +42,7 @@ class OnboardingMessage : FrameLayout {
 
         titlePaint.color = Color.BLACK
         titlePaint.isAntiAlias = true
-        titlePaint.textSize = 16 * scale
+        titlePaint.textSize = 14 * scale
         titlePaint.style = Paint.Style.FILL
         titlePaint.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD);
 
@@ -82,6 +82,7 @@ class OnboardingMessage : FrameLayout {
     }
 
     private fun drawContent(canvas: Canvas) {
+        var titleY = 0f
         if (isTextWiderThanScreen(this.title, titlePaint)) {
             // we need to break the title down into multipe lines
             val textParts = mutableListOf<String>()
@@ -100,31 +101,42 @@ class OnboardingMessage : FrameLayout {
                 textParts.add("$tempStringHolder ")
                 tempStringHolder = ""
             }
-            var currentDrawnTextLine = 0
             val textRect = Rect()
-            textParts.forEach { textPart ->
+            textParts.forEachIndexed { index, textPart ->
                 titlePaint.getTextBounds(
                     textPart,
                     0,
                     textPart.length,
                     textRect
                 )
+                titleY += PADDING_IN_DP + textRect.height()
+                if (index == 0)
+                    titleY += PADDING_IN_DP
+
                 canvas.drawText(
                     textPart,
                     width / 2 - (titlePaint.measureText(textPart) / 2),
-                    PADDING_IN_DP * 4 + currentDrawnTextLine * (textRect.height() + (currentDrawnTextLine * (PADDING_IN_DP * 3.5f)) / (currentDrawnTextLine + 1)),
+                    titleY,
                     titlePaint
                 )
-                currentDrawnTextLine++
             }
         } else {
+            titleY += PADDING_IN_DP * 4
             canvas.drawText(
                 this.title,
                 width / 2 - titlePaint.measureText(this.title) / 2 - PADDING_IN_DP,
-                PADDING_IN_DP * 4,
+                titleY,
                 titlePaint
             )
         }
+
+        canvas.drawLine(
+            0f + PADDING_IN_DP,
+            titleY + 2 * PADDING_IN_DP,
+            width - PADDING_IN_DP,
+            titleY + 2 * PADDING_IN_DP + 3,
+            textPaint
+        )
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

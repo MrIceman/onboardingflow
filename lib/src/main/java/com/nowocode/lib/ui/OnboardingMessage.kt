@@ -42,7 +42,7 @@ class OnboardingMessage : FrameLayout {
 
         titlePaint.color = Color.BLACK
         titlePaint.isAntiAlias = true
-        titlePaint.textSize = 18 * scale
+        titlePaint.textSize = 16 * scale
         titlePaint.style = Paint.Style.FILL
         titlePaint.typeface = Typeface.create(Typeface.MONOSPACE, Typeface.BOLD);
 
@@ -71,14 +71,14 @@ class OnboardingMessage : FrameLayout {
             backgroundPaint
         )
 
-            canvas?.let {
-                drawContent(it)
-            }
+        canvas?.let {
+            drawContent(it)
+        }
     }
 
     private fun isTextWiderThanScreen(text: String, paint: Paint): Boolean {
         val measuredTextWidth = paint.measureText(text)
-        return measuredTextWidth > (width - 2 * PADDING_IN_DP)
+        return measuredTextWidth > (width - 16 * PADDING_IN_DP)
     }
 
     private fun drawContent(canvas: Canvas) {
@@ -111,11 +111,10 @@ class OnboardingMessage : FrameLayout {
                 )
                 canvas.drawText(
                     textPart,
-                    width / 2 - titlePaint.measureText(this.title) / 2 - PADDING_IN_DP,
-                    PADDING_IN_DP * 4 + currentDrawnTextLine * (textRect.bottom + (PADDING_IN_DP / currentDrawnTextLine)),
+                    width / 2 - (titlePaint.measureText(textPart) / 2),
+                    PADDING_IN_DP * 4 + currentDrawnTextLine * (textRect.height() + (currentDrawnTextLine * (PADDING_IN_DP * 3.5f)) / (currentDrawnTextLine + 1)),
                     titlePaint
                 )
-
                 currentDrawnTextLine++
             }
         } else {

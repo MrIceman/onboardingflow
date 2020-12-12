@@ -3,6 +3,7 @@ package com.nowocode.lib.ui
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.TextView
@@ -22,7 +23,7 @@ internal class OnboardingScaffold : FrameLayout {
     private var currentDisplayedAction = 0
     private val clickThreshHold = 1000
     private var onboardingMessage: OnboardingMessage = OnboardingMessage(context)
-    private var onBoardingMessageLayoutParams: FrameLayout.LayoutParams? = null
+    private var onBoardingMessageLayoutParams = LayoutParams(0, 0)
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -32,8 +33,8 @@ internal class OnboardingScaffold : FrameLayout {
         defStyleAttr
     ) {
         setUpBackgroundPaint()
+        addView(onboardingMessage, onBoardingMessageLayoutParams)
     }
-
 
     private fun setUpBackgroundPaint() {
         backgroundPaint.color = Color.BLACK
@@ -50,6 +51,7 @@ internal class OnboardingScaffold : FrameLayout {
     }
 
     override fun onDraw(canvas: Canvas?) {
+        Log.d(this.javaClass.name, "OnboardingScaffold - onDraw")
         val screenBitMap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val screenCanvas = Canvas(screenBitMap)
 
@@ -112,14 +114,11 @@ internal class OnboardingScaffold : FrameLayout {
                 element.title,
                 element.text
             )
-
-            onBoardingMessageLayoutParams?.height = messageHeight.toInt()
+            onboardingMessage.layoutParams = onBoardingMessageLayoutParams
         }
 
         canvas?.drawBitmap(screenBitMap, 0f, 0f, Paint())
         /** TODO This should not happen within onDraw as this causes a recursion */
-        removeView(onboardingMessage)
-        addView(onboardingMessage, onBoardingMessageLayoutParams)
         onboardingMessage.translationY = dialogTopY
     }
 
@@ -128,6 +127,8 @@ internal class OnboardingScaffold : FrameLayout {
             w,
             (h * 0.3).toInt()
         )
+
+        onboardingMessage.invalidate()
 
         super.onSizeChanged(w, h, oldw, oldh)
     }

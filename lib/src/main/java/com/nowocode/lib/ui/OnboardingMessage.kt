@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.*
 import android.os.Build
 import android.util.AttributeSet
+import android.util.Log
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
 
@@ -57,6 +58,7 @@ class OnboardingMessage : FrameLayout {
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDraw(canvas: Canvas?) {
+        Log.d(this.javaClass.name, "OnboardingMessage - onDraw")
         val dialogWidth = width * 0.85
         val lineWidth = 30 * scale
         canvas?.drawRoundRect(

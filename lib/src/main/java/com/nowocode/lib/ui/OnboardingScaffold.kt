@@ -102,34 +102,28 @@ internal class OnboardingScaffold : FrameLayout {
             val viewHeight = element.view.get()?.height?.toFloat()!!
             val v = element.view.get() ?: throw IllegalStateException("No View passed in)")
             v.getLocationOnScreen(actionPosLocHolder)
-
-            if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
-
-                screenCanvas.drawRoundRect(
+            val viewRect =
+                if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
                     RectF(
                         actionPosLocHolder[0].toFloat() - PADDING,
                         actionPosLocHolder[1].toFloat() - viewHeight - PADDING,
                         actionPosLocHolder[0].toFloat() + viewWidth + PADDING,
                         actionPosLocHolder[1].toFloat() + (v.minHeight) + PADDING,
-                    ),
-                    15f,
-                    15f,
-                    featurePaint
-                )
-            } else {
-                screenCanvas.drawRoundRect(
+                    )
+                } else {
                     RectF(
                         actionPosLocHolder[0].toFloat() - PADDING,
                         actionPosLocHolder[1].toFloat() - (viewHeight / 2) - PADDING,
                         actionPosLocHolder[0].toFloat() + viewWidth + PADDING,
                         actionPosLocHolder[1].toFloat() + (viewHeight / 2) + PADDING,
-                    ),
-                    15f,
-                    15f,
-                    featurePaint
-                )
-            }
-
+                    )
+                }
+            screenCanvas.drawRoundRect(
+                viewRect,
+                15f,
+                15f,
+                featurePaint
+            )
             // Get Dialog position
             val messageHeight = height * 0.3f
             dialogTopY = when (element.verticalPosition) {

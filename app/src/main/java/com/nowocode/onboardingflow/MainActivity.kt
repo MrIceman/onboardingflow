@@ -6,6 +6,7 @@ import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
+import com.google.android.material.tabs.TabLayout
 import com.nowocode.lib.OnboardingManager
 
 class MainActivity : AppCompatActivity() {
@@ -20,6 +21,12 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show()
         }
+
+        val tabLayout = findViewById<TabLayout>(R.id.tabs)
+
+        val t = tabLayout.newTab()
+        t.setText("huhu")
+        tabLayout.addTab(t)
 
     }
 

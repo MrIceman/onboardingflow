@@ -1,13 +1,17 @@
 package com.nowocode.onboardingflow
 
+import android.os.Build
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.Toolbar
+import androidx.annotation.RequiresApi
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.tabs.TabLayout
 import com.nowocode.lib.OnboardingManager
 import com.nowocode.lib.ui.model.VerticalPosition
 
@@ -25,6 +29,7 @@ class FirstFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_first, container, false)
     }
 
+    @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -55,13 +60,20 @@ class FirstFragment : Fragment() {
                 VerticalPosition.TOP
             )
             .addOnboardingFeature(
-                requireActivity().findViewById<androidx.appcompat.widget.Toolbar>(
-                    R.id.toolbar
-                ), "Oh, select this amazing toolBAR",
+                (requireActivity().findViewById<TabLayout>(
+                    R.id.tabs
+                ) as TabLayout).getTabAt(1)?.view!!, "Oh, select this amazing toolBAR",
                 "Not sure why you would highlight a toolbar, but with this library.. Let's say you can do it.",
                 VerticalPosition.BOTTOM
             )
-            .setFadeIn(true, 500L, 0f, 0.75f)
+            .addOnboardingFeature(
+                (requireActivity().findViewById<TabLayout>(
+                    R.id.tabs
+                ) as TabLayout).getTabAt(0)?.view!!, "Oh, select this amazing toolBAR",
+                "Not sure why you would highlight a toolbar, but with this library.. Let's say you can do it.",
+                VerticalPosition.BOTTOM
+            )
+            .setFadeIn(true, 300L, 0f, 0.75f)
             .start()
     }
 }

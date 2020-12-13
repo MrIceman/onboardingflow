@@ -11,9 +11,10 @@ interface OnboardingManager {
 
     fun addOnboardingFeature(
         view: View,
+        title: String,
         text: String,
+        messagePosition: MessagePosition,
         onNext: (() -> Unit)? = null,
-        messagePosition: MessagePosition
     ): OnboardingManager
 
     fun start()

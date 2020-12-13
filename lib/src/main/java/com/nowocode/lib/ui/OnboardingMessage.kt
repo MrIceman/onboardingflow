@@ -13,8 +13,10 @@ class OnboardingMessage : FrameLayout {
     private val trianglePaint = Paint()
     private val titlePaint = Paint()
     private val textPaint = Paint()
-    private var title: String = "Title"
-    private var text: String = "blabla"
+    private var title: String =
+        "Too many people are not thinking."
+    private var text: String =
+        "Using this feature you can do this and that, but unfortunately it is a very rare skill! The people today are not thinking anymore. The problems and scandals of the past are unresolved and will stay unresolved because of the ignorant, uneducated new popularism generation."
     private val scale = context.resources.displayMetrics.density
     private val PADDING_IN_DP = 8 * scale
 
@@ -76,20 +78,32 @@ class OnboardingMessage : FrameLayout {
         }
     }
 
-    private fun isTextWiderThanScreen(text: String, paint: Paint): Boolean {
-        val measuredTextWidth = paint.measureText(text)
-        return measuredTextWidth > (width - 16 * PADDING_IN_DP)
+    private fun drawContent(canvas: Canvas) {
+        // Contains the latest Y position after a widget has been rendered.
+        // It is used to render new elements below the latest rendered one
+        var lastYPosition = renderText(canvas, title, titlePaint, 0f)
+
+        val fl = lastYPosition + 2 * PADDING_IN_DP
+        canvas.drawLine(
+            0f + 2 * PADDING_IN_DP,
+            fl,
+            width - 2 * PADDING_IN_DP,
+            fl + 3,
+            textPaint
+        )
+
+        lastYPosition = renderText(canvas, text, textPaint, lastYPosition + PADDING_IN_DP)
     }
 
-    private fun drawContent(canvas: Canvas) {
-        var titleY = 0f
-        if (isTextWiderThanScreen(this.title, titlePaint)) {
+    private fun renderText(canvas: Canvas, text: String, paint: Paint, yOffset: Float): Float {
+        var lastYPosition = yOffset
+        if (isTextWiderThanScreen(text, paint)) {
             // we need to break the title down into multipe lines
             val textParts = mutableListOf<String>()
             var tempStringHolder = ""
-            this.title.split(" ")
+            text.split(" ")
                 .map { titleWord ->
-                    if (!isTextWiderThanScreen(tempStringHolder, titlePaint))
+                    if (!isTextWiderThanScreen(tempStringHolder, paint))
                         tempStringHolder += "$titleWord "
                     else {
                         // text is too long
@@ -103,44 +117,38 @@ class OnboardingMessage : FrameLayout {
             }
             val textRect = Rect()
             textParts.forEachIndexed { index, textPart ->
-                titlePaint.getTextBounds(
+                paint.getTextBounds(
                     textPart,
                     0,
                     textPart.length,
                     textRect
                 )
-                titleY += PADDING_IN_DP + textRect.height()
+                lastYPosition += PADDING_IN_DP + textRect.height()
                 if (index == 0)
-                    titleY += PADDING_IN_DP
+                    lastYPosition += PADDING_IN_DP
 
                 canvas.drawText(
                     textPart,
-                    width / 2 - (titlePaint.measureText(textPart) / 2),
-                    titleY,
-                    titlePaint
+                    width / 2 - (paint.measureText(textPart) / 2),
+                    lastYPosition,
+                    paint
                 )
             }
         } else {
-            titleY += PADDING_IN_DP * 4
+            lastYPosition += PADDING_IN_DP * 4
             canvas.drawText(
                 this.title,
-                width / 2 - titlePaint.measureText(this.title) / 2 - PADDING_IN_DP,
-                titleY,
-                titlePaint
+                width / 2 - paint.measureText(this.title) / 2 - PADDING_IN_DP,
+                lastYPosition,
+                paint
             )
         }
 
-        canvas.drawLine(
-            0f + PADDING_IN_DP,
-            titleY + 2 * PADDING_IN_DP,
-            width - PADDING_IN_DP,
-            titleY + 2 * PADDING_IN_DP + 3,
-            textPaint
-        )
+        return lastYPosition
     }
 
-    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+    private fun isTextWiderThanScreen(text: String, paint: Paint): Boolean {
+        val measuredTextWidth = paint.measureText(text)
+        return measuredTextWidth > (width - 16 * PADDING_IN_DP)
     }
 }

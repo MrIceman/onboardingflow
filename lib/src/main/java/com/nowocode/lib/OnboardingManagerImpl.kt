@@ -2,7 +2,6 @@ package com.nowocode.lib
 
 import android.app.Activity
 import android.content.Context
-import android.speech.tts.TextToSpeech
 import android.view.View
 import android.widget.FrameLayout
 import com.nowocode.lib.ui.model.OnboardingAction
@@ -28,15 +27,16 @@ internal class OnboardingManagerImpl(private val context: Context) : OnboardingM
 
     override fun addOnboardingFeature(
         view: View,
+        title: String,
         text: String,
-        onNext: (() -> Unit)?,
         messagePosition: MessagePosition,
+        onNext: (() -> Unit)?,
     ): OnboardingManager {
         onboardingScaffold?.addOnBoardingAction(
             OnboardingAction(
                 WeakReference(view),
                 text,
-                text,
+                title,
                 messagePosition
             )
         )

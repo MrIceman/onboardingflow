@@ -1,5 +1,6 @@
 package com.nowocode.lib.ui
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
@@ -8,9 +9,9 @@ import android.view.MotionEvent
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import androidx.core.view.contains
-import com.nowocode.lib.ui.model.MessagePosition
+import com.nowocode.lib.ui.model.VerticalPosition
 import com.nowocode.lib.ui.model.OnboardingAction
+import com.nowocode.lib.ui.model.inverse
 
 
 internal class OnboardingScaffold : FrameLayout {
@@ -24,6 +25,15 @@ internal class OnboardingScaffold : FrameLayout {
     private val clickThreshHold = 1000
     private var onboardingMessage: OnboardingMessage = OnboardingMessage(context)
     private var onBoardingMessageLayoutParams = LayoutParams(0, 0)
+    private val opacityAnimator = ValueAnimator()
+    private var hasAnimated = false
+    private var canvas: Canvas? = null
+
+    /** fade in settings */
+    internal var shouldFadeIn = false
+    internal var fadeInDuration: Long = 0
+    internal var fadeInStartAlpha = 0f
+    internal var fadeInStopAlpha = 0.75f
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -36,9 +46,23 @@ internal class OnboardingScaffold : FrameLayout {
         addView(onboardingMessage, onBoardingMessageLayoutParams)
     }
 
+    internal fun initAnimator() {
+        opacityAnimator.duration = fadeInDuration
+        opacityAnimator.setIntValues(
+            (255 * fadeInStartAlpha).toInt(),
+            (255 * fadeInStopAlpha).toInt()
+        )
+        opacityAnimator.addUpdateListener {
+            val opacityLevel = it.animatedValue as Int
+            println("opacity level: $opacityLevel")
+            backgroundPaint.alpha = opacityLevel // opacityLevel.toInt()
+            invalidate()
+        }
+    }
+
     private fun setUpBackgroundPaint() {
         backgroundPaint.color = Color.BLACK
-        backgroundPaint.alpha = (255 * 0.5).toInt()
+        backgroundPaint.alpha = (255 * 0.8).toInt()
         backgroundPaint.style = Paint.Style.FILL
 
         featurePaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
@@ -51,17 +75,25 @@ internal class OnboardingScaffold : FrameLayout {
     }
 
     override fun onDraw(canvas: Canvas?) {
+        if (actions.isEmpty())
+            return
+
+        this.canvas = canvas
         Log.d(this.javaClass.name, "OnboardingScaffold - onDraw")
         val screenBitMap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val screenCanvas = Canvas(screenBitMap)
-
-        screenCanvas.drawRect(
-            0f,
-            0f,
-            width.toFloat(),
-            height.toFloat(),
-            backgroundPaint
-        )
+        if (hasAnimated || !shouldFadeIn) {
+            screenCanvas.drawRect(
+                0f,
+                0f,
+                width.toFloat(),
+                height.toFloat(),
+                backgroundPaint
+            )
+        } else {
+            hasAnimated = true
+            opacityAnimator.start()
+        }
 
         var dialogTopY = 0f
 
@@ -100,19 +132,21 @@ internal class OnboardingScaffold : FrameLayout {
 
             // Get Dialog position
             val messageHeight = height * 0.3f
-            dialogTopY = when (element.messagePosition) {
-                MessagePosition.TOP -> {
+            dialogTopY = when (element.verticalPosition) {
+                VerticalPosition.TOP -> {
                     actionPosLocHolder[1] - PADDING - messageHeight - viewHeight
                 }
-                MessagePosition.BOTTOM -> {
+                VerticalPosition.BOTTOM -> {
                     actionPosLocHolder[1] + viewHeight + PADDING
 
                 }
             }
 
-            onboardingMessage.setContent(
+            onboardingMessage.setUp(
                 element.title,
-                element.text
+                element.text,
+                actions[currentDisplayedAction].verticalPosition.inverse(),
+                actionPosLocHolder[0].toFloat()
             )
             onboardingMessage.layoutParams = onBoardingMessageLayoutParams
         }

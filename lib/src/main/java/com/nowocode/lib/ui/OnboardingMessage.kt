@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
+import com.nowocode.lib.ui.model.VerticalPosition
 
 class OnboardingMessage : FrameLayout {
     private val backgroundPaint = Paint()
@@ -17,8 +18,11 @@ class OnboardingMessage : FrameLayout {
         "Too many people are not thinking."
     private var text: String =
         "Using this feature you can do this and that, but unfortunately it is a very rare skill! The people today are not thinking anymore. The problems and scandals of the past are unresolved and will stay unresolved because of the ignorant, uneducated new popularism generation."
+    private var arrowDirection = VerticalPosition.BOTTOM
+    private var arrowXPos = 0f
     private val scale = context.resources.displayMetrics.density
     private val PADDING_IN_DP = 8 * scale
+    private val arrowPath = Path()
 
     // if is Top is true then the dialog triangle is at the bottom, reverse else
     var isTop: Boolean = true
@@ -33,9 +37,11 @@ class OnboardingMessage : FrameLayout {
         setUpPaints()
     }
 
-    fun setContent(title: String, text: String) {
+    fun setUp(title: String, text: String, arrowDirection: VerticalPosition, arrowXPos: Float) {
         this.title = title
         this.text = text
+        this.arrowDirection = arrowDirection
+        this.arrowXPos = arrowXPos
     }
 
     private fun setUpPaints() {
@@ -63,15 +69,21 @@ class OnboardingMessage : FrameLayout {
         Log.d(this.javaClass.name, "OnboardingMessage - onDraw")
         val dialogWidth = width * 0.85
         val lineWidth = 30 * scale
+        val arrowWidth = PADDING_IN_DP * 6
         canvas?.drawRoundRect(
             PADDING_IN_DP * 2,
             PADDING_IN_DP,
             width.toFloat() - PADDING_IN_DP * 2,
-            height.toFloat(),
+            height.toFloat() - arrowWidth,
             15f,
             15f,
             backgroundPaint
         )
+
+        // draw arrow
+        if(arrowDirection == VerticalPosition.BOTTOM) {
+
+        }
 
         canvas?.let {
             drawContent(it)

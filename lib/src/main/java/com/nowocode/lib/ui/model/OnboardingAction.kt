@@ -7,5 +7,5 @@ internal data class OnboardingAction(
     val view: WeakReference<View>,
     val text: String,
     val title: String,
-    val messagePosition: MessagePosition
+    val verticalPosition: VerticalPosition
 )

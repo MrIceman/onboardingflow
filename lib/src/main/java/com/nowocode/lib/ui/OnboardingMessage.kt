@@ -80,11 +80,6 @@ class OnboardingMessage : FrameLayout {
             backgroundPaint
         )
 
-        // draw arrow
-        if(arrowDirection == VerticalPosition.BOTTOM) {
-
-        }
-
         canvas?.let {
             drawContent(it)
         }

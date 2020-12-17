@@ -7,6 +7,7 @@ import android.graphics.*
 import android.util.AttributeSet
 import android.util.Log
 import android.view.MotionEvent
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
@@ -31,13 +32,15 @@ internal class OnboardingScaffold : FrameLayout {
     private val opacityAnimator = ValueAnimator()
     private var hasAnimated = false
     private var canvas: Canvas? = null
-    private var currentOpacityBackgroundLevel = 0.toInt()
+    private var currentOpacityBackgroundLevel = 0
 
     /** fade in settings */
     internal var shouldFadeIn = false
     internal var fadeInDuration: Long = 0
     internal var fadeInStartAlpha = 0f
     internal var fadeInStopAlpha = 0.75f
+
+    internal var onboardingDoneCallback: (() -> Unit)? = null
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -73,14 +76,14 @@ internal class OnboardingScaffold : FrameLayout {
         arrowIndicatorPaint.isAntiAlias = true
         arrowIndicatorPaint.color = Color.RED
 
-        pathPaint.color = Color.WHITE;
-        pathPaint.isAntiAlias = true;
-        pathPaint.run {
-            strokeWidth = 5f;
-            style = Paint.Style.FILL;
-            strokeJoin = Paint.Join.ROUND;
+        pathPaint.color = Color.WHITE
+        pathPaint.isAntiAlias = true
+        pathPaint.apply {
+            strokeWidth = 5f
+            style = Paint.Style.FILL
+            strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-        };
+        }
 
         setWillNotDraw(false)
     }
@@ -89,6 +92,11 @@ internal class OnboardingScaffold : FrameLayout {
         actions.add(action)
     }
 
+    /**
+     * Right now there are some allocations happening in onDraw.
+     * This should not be a noticable performance issue but still is not nice,
+     * so I'll leave cleaning it up as a TODO here and suppress the lint warning until then
+     */
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
         if (actions.isEmpty())
@@ -110,12 +118,11 @@ internal class OnboardingScaffold : FrameLayout {
             opacityAnimator.start()
         }
 
-        var dialogTopY = 0f
-
+        var dialogTopY: Float
         actions[currentDisplayedAction].let { element ->
-            val viewWidth = element.view.get()?.width?.toFloat()!!
-            val viewHeight = element.view.get()?.height?.toFloat()!!
-            val v = element.view.get() ?: throw IllegalStateException("No View passed in)")
+            val viewWidth = element.view.width.toFloat()
+            val viewHeight = element.view.height.toFloat()
+            val v = element.view
             v.getLocationOnScreen(featureViewCoordinates)
             val featureViewRect =
                 if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
@@ -202,11 +209,17 @@ internal class OnboardingScaffold : FrameLayout {
         event?.let {
             val duration = it.eventTime - it.downTime
             if (duration < clickThreshHold && event.action == MotionEvent.ACTION_UP) {
-                if (currentDisplayedAction < actions.size - 1)
+                if (currentDisplayedAction < actions.size - 1) {
                     currentDisplayedAction++
-                else
-                    currentDisplayedAction = 0
-                invalidate()
+                    invalidate()
+                } else {
+                    // We displayed our features, we can now safely delete the Scaffold
+                    this.actions.clear()
+                    (parent as ViewGroup)
+                        .removeView(this)
+                    this.onboardingDoneCallback?.invoke()
+                    this.onboardingDoneCallback = null
+                }
             }
         }
 
@@ -215,6 +228,4 @@ internal class OnboardingScaffold : FrameLayout {
 
     private fun <T> OnboardingAction.getTopOrBottomValue(topValue: T, botValue: T): T =
         if (this.verticalPosition == VerticalPosition.TOP) topValue else botValue
-
-    private fun Int.toDp(): Int = (this * scale).toInt()
 }

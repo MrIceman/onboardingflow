@@ -7,12 +7,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.Toolbar
 import androidx.annotation.RequiresApi
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.tabs.TabLayout
 import com.nowocode.lib.OnboardingManager
+import com.nowocode.lib.ui.model.OnboardingAction
 import com.nowocode.lib.ui.model.VerticalPosition
 
 /**
@@ -40,40 +40,52 @@ class FirstFragment : Fragment() {
         OnboardingManager
             .instance(requireContext())
             .setActivity(requireActivity())
-            .addOnboardingFeature(
-                view.findViewById(R.id.textview_first),
-                "Know your TextView",
-                "By setting your custom text view data you can let your users know what" +
-                        " the heck is going on with your UI :-)",
-                VerticalPosition.BOTTOM
+            .addAction(
+                OnboardingAction(
+                    view.findViewById(R.id.textview_first),
+                    "By setting your custom text view data you can let your users know what" +
+                            " the heck is going on with your UI :-)",
+                    "Know your TextView",
+                    VerticalPosition.BOTTOM
+                )
             )
-            .addOnboardingFeature(
-                requireActivity().findViewById<FloatingActionButton>(R.id.button_first),
-                "Navigate to the next screen!",
-                "By clicking that button you can skip this fragment and move to the first one!! How cool, huh?",
-                VerticalPosition.TOP
+            .addAction(
+                OnboardingAction(
+                    requireActivity().findViewById<FloatingActionButton>(R.id.button_first),
+                    "By clicking that button you can skip this fragment and move to the first one!! How cool, huh?",
+                    "Navigate to the next screen!",
+                    VerticalPosition.TOP
+                )
             )
-            .addOnboardingFeature(
-                requireActivity().findViewById<FloatingActionButton>(R.id.fab),
-                "Send an email!",
-                "You can use this button to create a custom email and contact the developer. You can always rant about the app or just tell him a hi :-)",
-                VerticalPosition.TOP
+            .addAction(
+                OnboardingAction(
+                    requireActivity().findViewById<FloatingActionButton>(R.id.fab),
+                    "You can use this button to create a custom email and contact the developer. You can always rant about the app or just tell him a hi :-)",
+                    "Send an email!",
+                    VerticalPosition.TOP
+                )
             )
-            .addOnboardingFeature(
-                (requireActivity().findViewById<TabLayout>(
-                    R.id.tabs
-                ) as TabLayout).getTabAt(1)?.view!!, "Oh, select this amazing toolBAR",
-                "Not sure why you would highlight a toolbar, but with this library.. Let's say you can do it.",
-                VerticalPosition.BOTTOM
+            .addAction(
+                OnboardingAction(
+                    (requireActivity().findViewById<TabLayout>(
+                        R.id.tabs
+                    ) as TabLayout).getTabAt(1)?.view!!,
+                    "This could be a description of what the user can find in Tab 2",
+                    "Selected Tab 2",
+                    VerticalPosition.BOTTOM
+                )
             )
-            .addOnboardingFeature(
-                (requireActivity().findViewById<TabLayout>(
-                    R.id.tabs
-                ) as TabLayout).getTabAt(0)?.view!!, "Oh, select this amazing toolBAR",
-                "Not sure why you would highlight a toolbar, but with this library.. Let's say you can do it.",
-                VerticalPosition.BOTTOM
+            .addAction(
+                OnboardingAction(
+                    (requireActivity().findViewById<TabLayout>(
+                        R.id.tabs
+                    ) as TabLayout).getTabAt(0)?.view!!,
+                    "This could be a description of what the user can find in Tab 1",
+                    "Selected Tab 1",
+                    VerticalPosition.BOTTOM
+                )
             )
-            .setFadeIn(true, 300L, 0f, 0.75f)
+            .setFadeIn(true, 300L, 0f, 0.7f)
             .start()
     }
 }

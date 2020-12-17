@@ -3,6 +3,7 @@ package com.nowocode.lib
 import android.app.Activity
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
 import com.nowocode.lib.ui.model.OnboardingAction
 import com.nowocode.lib.ui.OnboardingScaffold
@@ -32,20 +33,12 @@ internal class OnboardingManagerImpl(context: Context) : OnboardingManager {
     }
 
 
-    override fun addOnboardingFeature(
-        view: View,
-        title: String,
-        text: String,
-        verticalPosition: VerticalPosition,
+    override fun addAction(
+        action: OnboardingAction,
         onNext: (() -> Unit)?,
     ): OnboardingManager {
         onBoardingView.addOnBoardingAction(
-            OnboardingAction(
-                WeakReference(view),
-                text,
-                title,
-                verticalPosition
-            )
+            action
         )
         return this
     }
@@ -61,6 +54,10 @@ internal class OnboardingManagerImpl(context: Context) : OnboardingManager {
         )
         onBoardingView.bringToFront()
         onBoardingView.invalidate()
+    }
+
+    override fun setOnFinishListener(callback: () -> Unit) {
+        onBoardingView.onboardingDoneCallback
     }
 
 }

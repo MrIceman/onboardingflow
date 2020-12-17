@@ -12,7 +12,6 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
 import com.nowocode.lib.ui.model.OnboardingAction
 import com.nowocode.lib.ui.model.VerticalPosition
-import com.nowocode.lib.ui.model.inverse
 
 
 internal class OnboardingScaffold : FrameLayout {
@@ -120,71 +119,74 @@ internal class OnboardingScaffold : FrameLayout {
         actions[currentDisplayedAction].let { element ->
             // Save the X, Y positions of the view into an int array
             element.view.getLocationOnScreen(featureViewCoordinates)
-            // Create a rectangle around the view
-            val featureViewRect = getFeatureViewRect(element)
 
-            screenCanvas.drawRoundRect(
-                featureViewRect,
-                15f,
-                15f,
-                featurePaint
-            )
-
-            // Get the Y position of the message bubble
-            val viewHeight = element.view.height.toFloat()
-            val messageBubbleYPosition = element.getTopOrBottomValue(
-                topValue = featureViewCoordinates[1] - padding - messageHeight - viewHeight / 2,
-                botValue = featureViewCoordinates[1] + 3 * viewHeight / 2 + padding
-            )
-
-            onboardingMessage.setUp(
-                element.title,
-                element.text
-            )
-            onboardingMessage.layoutParams = onBoardingMessageLayoutParams
-            onboardingMessage.translationY = messageBubbleYPosition
-
-            // Draw the arrow above the message bubble
-            val arrowPath = getMessageBubbleArrowPath(
-                element,
-                messageBubbleYPosition
-            )
-            screenCanvas.drawPath(arrowPath, pathPaint)
+            drawFeatureViewRect(screenCanvas, element)
+            setUpMessageBubble(screenCanvas, element)
         }
 
         canvas?.drawBitmap(screenBitMap, 0f, 0f, Paint())
     }
 
-    private fun getFeatureViewRect(action: OnboardingAction): RectF {
+    private fun drawFeatureViewRect(canvas: Canvas, action: OnboardingAction) {
         val v = action.view
         val viewHeight = v.height
         val viewWidth = v.width
 
-        return if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
-            RectF(
-                featureViewCoordinates[0].toFloat() - padding,
-                featureViewCoordinates[1].toFloat() - viewHeight - padding,
-                featureViewCoordinates[0].toFloat() + viewWidth + padding,
-                featureViewCoordinates[1].toFloat() + (v.minHeight) + padding,
-            )
-        } else {
-            RectF(
-                featureViewCoordinates[0].toFloat() - padding,
-                featureViewCoordinates[1].toFloat() - (viewHeight / 2) - padding,
-                featureViewCoordinates[0].toFloat() + viewWidth + padding,
-                featureViewCoordinates[1].toFloat() + (viewHeight / 2) + padding,
-            )
-        }
+        val featureViewRect =
+            if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
+                RectF(
+                    featureViewCoordinates[0].toFloat() - padding,
+                    featureViewCoordinates[1].toFloat() - viewHeight - padding,
+                    featureViewCoordinates[0].toFloat() + viewWidth + padding,
+                    featureViewCoordinates[1].toFloat() + (v.minHeight) + padding,
+                )
+            } else {
+                RectF(
+                    featureViewCoordinates[0].toFloat() - padding,
+                    featureViewCoordinates[1].toFloat() - (viewHeight / 2) - padding,
+                    featureViewCoordinates[0].toFloat() + viewWidth + padding,
+                    featureViewCoordinates[1].toFloat() + (viewHeight / 2) + padding,
+                )
+            }
+
+        canvas.drawRoundRect(
+            featureViewRect,
+            15f,
+            15f,
+            featurePaint
+        )
     }
 
-    private fun getOnboardingMessage() {
+    private fun setUpMessageBubble(canvas: Canvas, action: OnboardingAction) {
+        val viewHeight = action.view.height.toFloat()
+        val messageBubbleYPosition = action.getTopOrBottomValue(
+            topValue = featureViewCoordinates[1] - padding - messageHeight - viewHeight / 2,
+            botValue = featureViewCoordinates[1] + 3 * viewHeight / 2 + padding
+        )
+
+        onboardingMessage.setUp(
+            action.title,
+            action.text
+        )
+        onboardingMessage.layoutParams = onBoardingMessageLayoutParams
+        onboardingMessage.translationY = messageBubbleYPosition
+
+        drawMessageBubbleArrow(
+            canvas,
+            action,
+            messageBubbleYPosition
+        )
+    }
+
+    private fun drawActionIndicator() {
 
     }
 
-    private fun getMessageBubbleArrowPath(
+    private fun drawMessageBubbleArrow(
+        canvas: Canvas,
         element: OnboardingAction,
         messageBubbleYPosition: Float
-    ): Path {
+    ) {
         val p = Path()
         val viewWidth = element.view.width
         val arcRect = RectF(
@@ -211,7 +213,7 @@ internal class OnboardingScaffold : FrameLayout {
             +180f
         )
 
-        return p
+        canvas.drawPath(p, pathPaint)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

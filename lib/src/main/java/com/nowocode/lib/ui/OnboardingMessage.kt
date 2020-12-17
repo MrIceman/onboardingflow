@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.widget.FrameLayout
 import androidx.annotation.RequiresApi
-import com.nowocode.lib.ui.model.VerticalPosition
 
 class OnboardingMessage : FrameLayout {
     private val backgroundPaint = Paint()
@@ -18,14 +17,8 @@ class OnboardingMessage : FrameLayout {
         "Too many people are not thinking."
     private var text: String =
         "Using this feature you can do this and that, but unfortunately it is a very rare skill! The people today are not thinking anymore. The problems and scandals of the past are unresolved and will stay unresolved because of the ignorant, uneducated new popularism generation."
-    private var arrowDirection = VerticalPosition.BOTTOM
-    private var arrowXPos = 0f
     private val scale = context.resources.displayMetrics.density
-    private val PADDING_IN_DP = 8 * scale
-    private val arrowPath = Path()
-
-    // if is Top is true then the dialog triangle is at the bottom, reverse else
-    var isTop: Boolean = true
+    private val padding = 8 * scale // 8dp
 
     constructor(context: Context) : this(context, null)
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)
@@ -37,11 +30,9 @@ class OnboardingMessage : FrameLayout {
         setUpPaints()
     }
 
-    fun setUp(title: String, text: String, arrowDirection: VerticalPosition, arrowXPos: Float) {
+    internal fun setUp(title: String, text: String) {
         this.title = title
         this.text = text
-        this.arrowDirection = arrowDirection
-        this.arrowXPos = arrowXPos
     }
 
     private fun setUpPaints() {
@@ -67,14 +58,13 @@ class OnboardingMessage : FrameLayout {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onDraw(canvas: Canvas?) {
         Log.d(this.javaClass.name, "OnboardingMessage - onDraw")
-        val dialogWidth = width * 0.85
-        val lineWidth = 30 * scale
-        val arrowWidth = PADDING_IN_DP * 6
+
+        val bottomPadding = padding * 6
         canvas?.drawRoundRect(
-            PADDING_IN_DP * 2,
-            PADDING_IN_DP,
-            width.toFloat() - PADDING_IN_DP * 2,
-            height.toFloat() - arrowWidth,
+            padding * 2,
+            padding,
+            width.toFloat() - padding * 2,
+            height.toFloat() - bottomPadding,
             15f,
             15f,
             backgroundPaint
@@ -90,16 +80,16 @@ class OnboardingMessage : FrameLayout {
         // It is used to render new elements below the latest rendered one
         var lastYPosition = renderText(canvas, title, titlePaint, 0f)
 
-        val fl = lastYPosition + 2 * PADDING_IN_DP
+        val fl = lastYPosition + 2 * padding
         canvas.drawLine(
-            0f + 2 * PADDING_IN_DP,
+            0f + 2 * padding,
             fl,
-            width - 2 * PADDING_IN_DP,
+            width - 2 * padding,
             fl + 3,
             textPaint
         )
 
-        lastYPosition = renderText(canvas, text, textPaint, lastYPosition + PADDING_IN_DP)
+        lastYPosition = renderText(canvas, text, textPaint, lastYPosition + padding)
     }
 
     private fun renderText(canvas: Canvas, text: String, paint: Paint, yOffset: Float): Float {
@@ -130,9 +120,9 @@ class OnboardingMessage : FrameLayout {
                     textPart.length,
                     textRect
                 )
-                lastYPosition += PADDING_IN_DP + textRect.height()
+                lastYPosition += padding + textRect.height()
                 if (index == 0)
-                    lastYPosition += PADDING_IN_DP
+                    lastYPosition += padding
 
                 canvas.drawText(
                     textPart,
@@ -142,10 +132,10 @@ class OnboardingMessage : FrameLayout {
                 )
             }
         } else {
-            lastYPosition += PADDING_IN_DP * 4
+            lastYPosition += padding * 4
             canvas.drawText(
                 this.title,
-                width / 2 - paint.measureText(this.title) / 2 - PADDING_IN_DP,
+                width / 2 - paint.measureText(this.title) / 2 - padding,
                 lastYPosition,
                 paint
             )
@@ -156,6 +146,6 @@ class OnboardingMessage : FrameLayout {
 
     private fun isTextWiderThanScreen(text: String, paint: Paint): Boolean {
         val measuredTextWidth = paint.measureText(text)
-        return measuredTextWidth > (width - 16 * PADDING_IN_DP)
+        return measuredTextWidth > (width - 16 * padding)
     }
 }

@@ -19,25 +19,26 @@ internal class OnboardingScaffold : FrameLayout {
     private val featurePaint = Paint()
     private val arrowIndicatorPaint = Paint()
     private val pathPaint = Paint()
-
+    private val scale = context.resources.displayMetrics.density
+    private val padding: Float = 8 * scale // 8dp
     private val actions: MutableList<OnboardingAction> = mutableListOf()
     private val featureViewCoordinates = IntArray(2)
-    private val scale = context.resources.displayMetrics.density
-    private val PADDING: Float = 8 * scale
+    private var onboardingMessage: OnboardingMessage = OnboardingMessage(context)
+    private val opacityAnimator = ValueAnimator()
     private var currentDisplayedAction = 0
     private val clickThreshHold = 1000
-    private var onboardingMessage: OnboardingMessage = OnboardingMessage(context)
     private var onBoardingMessageLayoutParams = LayoutParams(0, 0)
-    private val opacityAnimator = ValueAnimator()
-    private var hasAnimated = false
-    private var canvas: Canvas? = null
-    private var currentOpacityBackgroundLevel = 0
 
     /** fade in settings */
+    private var isAnimating = false
+    private var currentOpacityBackgroundLevel = 0
     internal var shouldFadeIn = false
     internal var fadeInDuration: Long = 0
     internal var fadeInStartAlpha = 0f
     internal var fadeInStopAlpha = 0.75f
+
+    /** message bubble */
+    private var messageHeight = height * 0.3f
 
     internal var onboardingDoneCallback: (() -> Unit)? = null
 
@@ -60,7 +61,6 @@ internal class OnboardingScaffold : FrameLayout {
         )
         opacityAnimator.addUpdateListener {
             val opacityLevel = it.animatedValue as Int
-            println("opacity level: $opacityLevel")
             currentOpacityBackgroundLevel = opacityLevel
             invalidate()
         }
@@ -101,10 +101,9 @@ internal class OnboardingScaffold : FrameLayout {
         if (actions.isEmpty())
             return
 
-        this.canvas = canvas
         val screenBitMap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val screenCanvas = Canvas(screenBitMap)
-        if (hasAnimated || !shouldFadeIn) {
+        if (isAnimating || !shouldFadeIn) {
             screenCanvas.drawARGB(
                 currentOpacityBackgroundLevel,
                 0,
@@ -112,33 +111,18 @@ internal class OnboardingScaffold : FrameLayout {
                 0
             )
         } else {
-            hasAnimated = true
+            isAnimating = true
             opacityAnimator.start()
+            return
         }
 
+        // Paint an action
         actions[currentDisplayedAction].let { element ->
-            val messageBubbleYPosition: Float
-            val viewWidth = element.view.width.toFloat()
-            val viewHeight = element.view.height.toFloat()
-            val v = element.view
-            v.getLocationOnScreen(featureViewCoordinates)
+            // Save the X, Y positions of the view into an int array
+            element.view.getLocationOnScreen(featureViewCoordinates)
             // Create a rectangle around the view
-            val featureViewRect =
-                if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
-                    RectF(
-                        featureViewCoordinates[0].toFloat() - PADDING,
-                        featureViewCoordinates[1].toFloat() - viewHeight - PADDING,
-                        featureViewCoordinates[0].toFloat() + viewWidth + PADDING,
-                        featureViewCoordinates[1].toFloat() + (v.minHeight) + PADDING,
-                    )
-                } else {
-                    RectF(
-                        featureViewCoordinates[0].toFloat() - PADDING,
-                        featureViewCoordinates[1].toFloat() - (viewHeight / 2) - PADDING,
-                        featureViewCoordinates[0].toFloat() + viewWidth + PADDING,
-                        featureViewCoordinates[1].toFloat() + (viewHeight / 2) + PADDING,
-                    )
-                }
+            val featureViewRect = getFeatureViewRect(element)
+
             screenCanvas.drawRoundRect(
                 featureViewRect,
                 15f,
@@ -147,53 +131,91 @@ internal class OnboardingScaffold : FrameLayout {
             )
 
             // Get the Y position of the message bubble
-            val messageHeight = height * 0.3f
-            messageBubbleYPosition = element.getTopOrBottomValue(
-                topValue = featureViewCoordinates[1] - PADDING - messageHeight - viewHeight / 2,
-                botValue = featureViewCoordinates[1] + 3 * viewHeight / 2 + PADDING
+            val viewHeight = element.view.height.toFloat()
+            val messageBubbleYPosition = element.getTopOrBottomValue(
+                topValue = featureViewCoordinates[1] - padding - messageHeight - viewHeight / 2,
+                botValue = featureViewCoordinates[1] + 3 * viewHeight / 2 + padding
             )
 
             onboardingMessage.setUp(
                 element.title,
-                element.text,
-                actions[currentDisplayedAction].verticalPosition.inverse(),
-                featureViewCoordinates[0].toFloat()
+                element.text
             )
             onboardingMessage.layoutParams = onBoardingMessageLayoutParams
+            onboardingMessage.translationY = messageBubbleYPosition
 
             // Drawing the arrow above the message bubble
-            val p = Path()
-            val arcRect = RectF(
-                featureViewCoordinates[0] + viewWidth / 2 - PADDING,
-                element.getTopOrBottomValue(
-                    messageBubbleYPosition
-                            + (messageHeight / 2),
-                    messageBubbleYPosition - PADDING
-                ),
-                featureViewCoordinates[0] + viewWidth / 2 + PADDING,
-                element.getTopOrBottomValue(
-                    messageBubbleYPosition + (messageHeight / 2) + 8 * PADDING,
-                    messageBubbleYPosition + messageHeight / 2
-                )
+            val arrowPath = getMessageBubbleArrowPath(
+                element,
+                messageBubbleYPosition
             )
-            p.addArc(
-                arcRect,
-                340f,
-                -180f
-            )
-            p.addArc(
-                arcRect,
-                340f,
-                +180f
-            )
-            screenCanvas.drawPath(p, pathPaint)
-            onboardingMessage.translationY = messageBubbleYPosition
+            screenCanvas.drawPath(arrowPath, pathPaint)
         }
 
         canvas?.drawBitmap(screenBitMap, 0f, 0f, Paint())
     }
 
+    private fun getFeatureViewRect(action: OnboardingAction): RectF {
+        val v = action.view
+        val viewHeight = v.height
+        val viewWidth = v.width
+
+        return if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
+            RectF(
+                featureViewCoordinates[0].toFloat() - padding,
+                featureViewCoordinates[1].toFloat() - viewHeight - padding,
+                featureViewCoordinates[0].toFloat() + viewWidth + padding,
+                featureViewCoordinates[1].toFloat() + (v.minHeight) + padding,
+            )
+        } else {
+            RectF(
+                featureViewCoordinates[0].toFloat() - padding,
+                featureViewCoordinates[1].toFloat() - (viewHeight / 2) - padding,
+                featureViewCoordinates[0].toFloat() + viewWidth + padding,
+                featureViewCoordinates[1].toFloat() + (viewHeight / 2) + padding,
+            )
+        }
+    }
+
+    private fun getOnboardingMessage() {
+
+    }
+
+    private fun getMessageBubbleArrowPath(
+        element: OnboardingAction,
+        messageBubbleYPosition: Float
+    ): Path {
+        val p = Path()
+        val viewWidth = element.view.width
+        val arcRect = RectF(
+            featureViewCoordinates[0] + viewWidth / 2 - padding,
+            element.getTopOrBottomValue(
+                messageBubbleYPosition
+                        + (messageHeight / 2),
+                messageBubbleYPosition - padding
+            ),
+            featureViewCoordinates[0] + viewWidth / 2 + padding,
+            element.getTopOrBottomValue(
+                messageBubbleYPosition + (messageHeight / 2) + 8 * padding,
+                messageBubbleYPosition + messageHeight / 2
+            )
+        )
+        p.addArc(
+            arcRect,
+            340f,
+            -180f
+        )
+        p.addArc(
+            arcRect,
+            340f,
+            +180f
+        )
+
+        return p
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        messageHeight = h * 0.3f
         onBoardingMessageLayoutParams = LayoutParams(
             w,
             (h * 0.3).toInt()

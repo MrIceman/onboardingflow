@@ -116,7 +116,7 @@ internal class OnboardingScaffold : FrameLayout {
             return
         }
 
-        // Paint an action
+        // Draw the action
         actions[currentDisplayedAction].let { element ->
             // Save the X, Y positions of the view into an int array
             element.view.getLocationOnScreen(featureViewCoordinates)
@@ -144,7 +144,7 @@ internal class OnboardingScaffold : FrameLayout {
             onboardingMessage.layoutParams = onBoardingMessageLayoutParams
             onboardingMessage.translationY = messageBubbleYPosition
 
-            // Drawing the arrow above the message bubble
+            // Draw the arrow above the message bubble
             val arrowPath = getMessageBubbleArrowPath(
                 element,
                 messageBubbleYPosition

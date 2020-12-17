@@ -18,6 +18,9 @@ internal class OnboardingScaffold : FrameLayout {
     private val featurePaint = Paint()
     private val arrowIndicatorPaint = Paint()
     private val pathPaint = Paint()
+    private val actionIndexCirclePaint = Paint()
+    private val currentActionIndexCirclePaint = Paint()
+
     private val scale = context.resources.displayMetrics.density
     private val padding: Float = 8 * scale // 8dp
     private val actions: MutableList<OnboardingAction> = mutableListOf()
@@ -78,6 +81,24 @@ internal class OnboardingScaffold : FrameLayout {
         pathPaint.isAntiAlias = true
         pathPaint.apply {
             strokeWidth = 5f
+            style = Paint.Style.FILL
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+        }
+
+        actionIndexCirclePaint.apply {
+            color = Color.WHITE
+            isAntiAlias = true
+            strokeWidth = 1f
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+        }
+
+        currentActionIndexCirclePaint.apply {
+            color = Color.WHITE
+            isAntiAlias = true
+            strokeWidth = 1f
             style = Paint.Style.FILL
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
@@ -176,10 +197,8 @@ internal class OnboardingScaffold : FrameLayout {
             action,
             messageBubbleYPosition
         )
-    }
 
-    private fun drawActionIndicator() {
-
+        drawActionIndexIndicator(canvas)
     }
 
     private fun drawMessageBubbleArrow(
@@ -214,6 +233,23 @@ internal class OnboardingScaffold : FrameLayout {
         )
 
         canvas.drawPath(p, pathPaint)
+    }
+
+    private fun drawActionIndexIndicator(canvas: Canvas) {
+        val countOfActions = actions.size
+        val circleRadius = padding / 2
+
+        for (i in 0 until countOfActions) {
+            canvas.drawCircle(
+                width / 2f - ((countOfActions / 2) - i) * (1.5f * padding),
+                height - 6 * padding,
+                circleRadius,
+                if (i == currentDisplayedAction)
+                    currentActionIndexCirclePaint
+                else
+                    actionIndexCirclePaint
+            )
+        }
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

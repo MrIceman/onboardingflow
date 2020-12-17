@@ -55,7 +55,7 @@ internal class OnboardingManagerImpl(context: Context) : OnboardingManager {
     }
 
     override fun onDone(callback: () -> Unit): OnboardingManager {
-        onBoardingView.onboardingDoneCallback
+        onBoardingView.onboardingDoneCallback = callback
 
         return this
     }

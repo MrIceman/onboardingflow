@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import android.view.Menu
 import android.view.MenuItem
 import com.google.android.material.tabs.TabLayout
-import com.nowocode.lib.OnboardingManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -24,9 +23,13 @@ class MainActivity : AppCompatActivity() {
 
         val tabLayout = findViewById<TabLayout>(R.id.tabs)
 
-        val t = tabLayout.newTab()
-        t.setText("huhu")
-        tabLayout.addTab(t)
+        val t1 = tabLayout.newTab()
+        t1.setText("Tab 1")
+        tabLayout.addTab(t1)
+
+        val t2 = tabLayout.newTab()
+        t2.setText("Tab 2")
+        tabLayout.addTab(t2)
 
     }
 

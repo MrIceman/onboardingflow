@@ -22,16 +22,10 @@
             android:id="@+id/tabs"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:tabGravity="fill"
             android:background="?attr/colorPrimary"
-            app:tabMode="fixed">
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="hello" />
-
-        </com.google.android.material.tabs.TabLayout>
+            app:tabGravity="fill"
+            app:tabSelectedTextColor="@color/white"
+            app:tabMode="fixed" />
 
     </com.google.android.material.appbar.AppBarLayout>
 

@@ -20,12 +20,11 @@ internal class OnboardingManagerImpl(context: Context) : OnboardingManager {
     }
 
     override fun setFadeIn(
-        fadeIn: Boolean,
         durationInMs: Long,
         fromAlpha: Float,
         toAlpha: Float
     ): OnboardingManager {
-        onBoardingView.shouldFadeIn = fadeIn
+        onBoardingView.shouldFadeIn = true
         onBoardingView.fadeInStartAlpha = fromAlpha
         onBoardingView.fadeInStopAlpha = toAlpha
         onBoardingView.fadeInDuration = durationInMs
@@ -35,7 +34,6 @@ internal class OnboardingManagerImpl(context: Context) : OnboardingManager {
 
     override fun addAction(
         action: OnboardingAction,
-        onNext: (() -> Unit)?,
     ): OnboardingManager {
         onBoardingView.addOnBoardingAction(
             action
@@ -56,8 +54,10 @@ internal class OnboardingManagerImpl(context: Context) : OnboardingManager {
         onBoardingView.invalidate()
     }
 
-    override fun setOnFinishListener(callback: () -> Unit) {
+    override fun onDone(callback: () -> Unit): OnboardingManager {
         onBoardingView.onboardingDoneCallback
+
+        return this
     }
 
 }

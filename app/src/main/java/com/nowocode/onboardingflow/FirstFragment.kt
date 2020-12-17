@@ -85,7 +85,14 @@ class FirstFragment : Fragment() {
                     VerticalPosition.BOTTOM
                 )
             )
-            .setFadeIn(true, 300L, 0f, 0.7f)
+            .setFadeIn(
+                300L,
+                0f,
+                0.7f
+            )
+            .onDone {
+
+            }
             .start()
     }
 }

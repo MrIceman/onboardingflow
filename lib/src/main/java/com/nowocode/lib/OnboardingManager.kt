@@ -8,22 +8,43 @@ import com.nowocode.lib.ui.model.VerticalPosition
 
 interface OnboardingManager {
 
-    fun setOnFinishListener(callback: () -> Unit)
+    /**
+     * A callback that is executed after user has gone through the onboarding flow
+     */
+    fun onDone(callback: () -> Unit): OnboardingManager
 
+    /**
+     * The current visible activity. It is required for adding the mask
+     */
     fun setActivity(activity: Activity): OnboardingManager
 
+    /**
+     * If called then the onboarding flow wil have an initial fade-in animation
+     *
+     * @param durationInMs the total length of the fade-in animation
+     * @param fromAlpha the start value at which the fade-in should happen (recommended is 0)
+     * @param toAlpha the final alpha level to which the onboarding flow will be animated to
+     */
     fun setFadeIn(
-        fadeIn: Boolean,
-        durationInMs: Long = 150000L,
+        durationInMs: Long = 1500L,
         fromAlpha: Float = 0f,
         toAlpha: Float = 0.8f
     ): OnboardingManager
 
+    /**
+     * Adds an [OnboardingAction], the actions are shown in insertion order
+     *
+     * @param action an action contains all the information about your feature that you want to
+     *               display within your flow
+     */
     fun addAction(
-        action: OnboardingAction,
-        onNext: (() -> Unit)? = null,
+        action: OnboardingAction
     ): OnboardingManager
 
+
+    /**
+     * Starts the onboarding flow.
+     */
     fun start()
 
 

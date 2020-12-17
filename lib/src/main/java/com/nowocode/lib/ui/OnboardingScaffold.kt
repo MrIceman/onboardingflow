@@ -197,8 +197,8 @@ internal class OnboardingScaffold : FrameLayout {
             action,
             messageBubbleYPosition
         )
-
         drawActionIndexIndicator(canvas)
+        addCloseable()
     }
 
     private fun drawMessageBubbleArrow(
@@ -251,6 +251,17 @@ internal class OnboardingScaffold : FrameLayout {
         }
     }
 
+    private fun addCloseable() {
+        val closeable = OnboardingCloseable(context)
+        addView(closeable, 70, 70)
+        closeable.translationY = 4 * padding
+        closeable.translationX = width - 4 * padding
+        closeable.onClose = {
+            this.onboardingDoneCallback?.invoke()
+            finish()
+        }
+    }
+
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         messageHeight = h * 0.3f
         onBoardingMessageLayoutParams = LayoutParams(
@@ -272,16 +283,20 @@ internal class OnboardingScaffold : FrameLayout {
                     invalidate()
                 } else {
                     // We displayed our features, we can now safely delete the Scaffold
-                    this.actions.clear()
-                    (parent as ViewGroup)
-                        .removeView(this)
-                    this.onboardingDoneCallback?.invoke()
-                    this.onboardingDoneCallback = null
+                    finish()
                 }
             }
         }
 
         return true
+    }
+
+    private fun finish() {
+        this.actions.clear()
+        (parent as ViewGroup)
+            .removeView(this)
+        this.onboardingDoneCallback?.invoke()
+        this.onboardingDoneCallback = null
     }
 
     // returns the topValue if the element is placed at the top else bottom value

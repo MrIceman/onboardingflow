@@ -1,7 +1,5 @@
 # onboardingflow
 
-<img src="onboardingflow-animation.gif" height="500" width="300"/>
-
 A library that allows you to highlight and describe any visible UI Element to your users. <br/>
 It is under development but can be already used / tested. The API is quite simple, call from your current Fragment / Activity below code
 

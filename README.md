@@ -7,6 +7,7 @@ It is under development but can be already used / tested. The API is quite simpl
 
 ```kotlin
 
+val viewA: View = //.. any view
 OnboardingManager
             .instance(requireContext())
             .setActivity(requireActivity())

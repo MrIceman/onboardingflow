@@ -5,7 +5,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -103,7 +102,6 @@ internal class OnboardingScaffold : FrameLayout {
             return
 
         this.canvas = canvas
-        Log.d(this.javaClass.name, "OnboardingScaffold - onDraw")
         val screenBitMap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val screenCanvas = Canvas(screenBitMap)
         if (hasAnimated || !shouldFadeIn) {
@@ -118,12 +116,13 @@ internal class OnboardingScaffold : FrameLayout {
             opacityAnimator.start()
         }
 
-        var dialogTopY: Float
         actions[currentDisplayedAction].let { element ->
+            val messageBubbleYPosition: Float
             val viewWidth = element.view.width.toFloat()
             val viewHeight = element.view.height.toFloat()
             val v = element.view
             v.getLocationOnScreen(featureViewCoordinates)
+            // Create a rectangle around the view
             val featureViewRect =
                 if (v.javaClass.superclass == AppCompatTextView::class.java && v is TextView) {
                     RectF(
@@ -147,9 +146,9 @@ internal class OnboardingScaffold : FrameLayout {
                 featurePaint
             )
 
-            // Get Dialog position
+            // Get the Y position of the message bubble
             val messageHeight = height * 0.3f
-            dialogTopY = element.getTopOrBottomValue(
+            messageBubbleYPosition = element.getTopOrBottomValue(
                 topValue = featureViewCoordinates[1] - PADDING - messageHeight - viewHeight / 2,
                 botValue = featureViewCoordinates[1] + 3 * viewHeight / 2 + PADDING
             )
@@ -162,18 +161,19 @@ internal class OnboardingScaffold : FrameLayout {
             )
             onboardingMessage.layoutParams = onBoardingMessageLayoutParams
 
+            // Drawing the arrow above the message bubble
             val p = Path()
             val arcRect = RectF(
                 featureViewCoordinates[0] + viewWidth / 2 - PADDING,
                 element.getTopOrBottomValue(
-                    dialogTopY
+                    messageBubbleYPosition
                             + (messageHeight / 2),
-                    dialogTopY - PADDING
+                    messageBubbleYPosition - PADDING
                 ),
                 featureViewCoordinates[0] + viewWidth / 2 + PADDING,
                 element.getTopOrBottomValue(
-                    dialogTopY + (messageHeight / 2) + 8 * PADDING,
-                    dialogTopY + messageHeight / 2
+                    messageBubbleYPosition + (messageHeight / 2) + 8 * PADDING,
+                    messageBubbleYPosition + messageHeight / 2
                 )
             )
             p.addArc(
@@ -187,9 +187,8 @@ internal class OnboardingScaffold : FrameLayout {
                 +180f
             )
             screenCanvas.drawPath(p, pathPaint)
+            onboardingMessage.translationY = messageBubbleYPosition
         }
-
-        onboardingMessage.translationY = dialogTopY
 
         canvas?.drawBitmap(screenBitMap, 0f, 0f, Paint())
     }
@@ -226,6 +225,9 @@ internal class OnboardingScaffold : FrameLayout {
         return true
     }
 
+    // returns the topValue if the element is placed at the top else bottom value
+    // this is an useful helper method when you need to calculate two different values
+    // based on the position of the message bubble
     private fun <T> OnboardingAction.getTopOrBottomValue(topValue: T, botValue: T): T =
         if (this.verticalPosition == VerticalPosition.TOP) topValue else botValue
 }

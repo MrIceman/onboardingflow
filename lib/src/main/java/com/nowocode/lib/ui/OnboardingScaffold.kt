@@ -211,13 +211,12 @@ internal class OnboardingScaffold : FrameLayout {
         val arcRect = RectF(
             featureViewCoordinates[0] + viewWidth / 2 - padding,
             element.getTopOrBottomValue(
-                messageBubbleYPosition
-                        + (messageHeight / 2),
-                messageBubbleYPosition - padding
+                messageBubbleYPosition + messageHeight / 2,
+                messageBubbleYPosition - padding //+ onboardingMessage.height + padding
             ),
             featureViewCoordinates[0] + viewWidth / 2 + padding,
             element.getTopOrBottomValue(
-                messageBubbleYPosition + (messageHeight / 2) + 8 * padding,
+                messageBubbleYPosition - 4 * padding + onboardingMessage.height,
                 messageBubbleYPosition + messageHeight / 2
             )
         )

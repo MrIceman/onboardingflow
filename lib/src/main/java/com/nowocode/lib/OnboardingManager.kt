@@ -31,6 +31,15 @@ interface OnboardingManager {
         toAlpha: Float = 0.8f
     ): OnboardingManager
 
+
+    /**
+     * Sets the hint text at the bottom of the scaffold, which tells the user how to
+     * continue through the onboarding process.
+     *
+     * @param text the hint text that should be displayed
+     */
+    fun setContinueHintText(text: String): OnboardingManager
+
     /**
      * Adds an [OnboardingAction], the actions are shown in insertion order
      *
@@ -40,7 +49,6 @@ interface OnboardingManager {
     fun addAction(
         action: OnboardingAction
     ): OnboardingManager
-
 
     /**
      * Starts the onboarding flow.

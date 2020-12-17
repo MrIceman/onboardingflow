@@ -31,6 +31,11 @@ internal class OnboardingManagerImpl(context: Context) : OnboardingManager {
         return this
     }
 
+    override fun setContinueHintText(text: String): OnboardingManager {
+        onBoardingView.continueHintText = text
+        return this
+    }
+
 
     override fun addAction(
         action: OnboardingAction,

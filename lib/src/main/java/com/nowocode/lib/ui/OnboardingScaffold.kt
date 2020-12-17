@@ -20,16 +20,19 @@ internal class OnboardingScaffold : FrameLayout {
     private val pathPaint = Paint()
     private val actionIndexCirclePaint = Paint()
     private val currentActionIndexCirclePaint = Paint()
+    private val textPaint = Paint()
 
     private val scale = context.resources.displayMetrics.density
     private val padding: Float = 8 * scale // 8dp
     private val actions: MutableList<OnboardingAction> = mutableListOf()
     private val featureViewCoordinates = IntArray(2)
-    private var onboardingMessage: OnboardingMessage = OnboardingMessage(context)
+    private var onboardingMessageView: OnboardingMessage = OnboardingMessage(context)
+    private var onBoardingMessageLayoutParams = LayoutParams(0, 0)
+    private val closeableView = OnboardingCloseable(context)
+
     private val opacityAnimator = ValueAnimator()
     private var currentDisplayedAction = 0
     private val clickThreshHold = 1000
-    private var onBoardingMessageLayoutParams = LayoutParams(0, 0)
 
     /** fade in settings */
     private var isAnimating = false
@@ -42,6 +45,9 @@ internal class OnboardingScaffold : FrameLayout {
     /** message bubble */
     private var messageHeight = height * 0.3f
 
+    /** hint text */
+    internal var continueHintText = "Tap on the screen to continue"
+
     internal var onboardingDoneCallback: (() -> Unit)? = null
 
     constructor(context: Context) : this(context, null)
@@ -52,7 +58,8 @@ internal class OnboardingScaffold : FrameLayout {
         defStyleAttr
     ) {
         setUpBackgroundPaint()
-        addView(onboardingMessage, onBoardingMessageLayoutParams)
+        addView(onboardingMessageView, onBoardingMessageLayoutParams)
+        addView(closeableView, 70, 70)
     }
 
     internal fun initAnimator() {
@@ -102,6 +109,16 @@ internal class OnboardingScaffold : FrameLayout {
             style = Paint.Style.FILL
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
+        }
+
+        textPaint.apply {
+            color = Color.WHITE
+            isAntiAlias = true
+            strokeWidth = 1f
+            style = Paint.Style.FILL_AND_STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            textSize = 12.0f * scale
         }
 
         setWillNotDraw(false)
@@ -176,6 +193,8 @@ internal class OnboardingScaffold : FrameLayout {
             15f,
             featurePaint
         )
+
+        addCloseable()
     }
 
     private fun setUpMessageBubble(canvas: Canvas, action: OnboardingAction) {
@@ -185,12 +204,12 @@ internal class OnboardingScaffold : FrameLayout {
             botValue = featureViewCoordinates[1] + 3 * viewHeight / 2 + padding
         )
 
-        onboardingMessage.setUp(
+        onboardingMessageView.setUp(
             action.title,
             action.text
         )
-        onboardingMessage.layoutParams = onBoardingMessageLayoutParams
-        onboardingMessage.translationY = messageBubbleYPosition
+        onboardingMessageView.layoutParams = onBoardingMessageLayoutParams
+        onboardingMessageView.translationY = messageBubbleYPosition
 
         drawMessageBubbleArrow(
             canvas,
@@ -198,7 +217,6 @@ internal class OnboardingScaffold : FrameLayout {
             messageBubbleYPosition
         )
         drawActionIndexIndicator(canvas)
-        addCloseable()
     }
 
     private fun drawMessageBubbleArrow(
@@ -212,11 +230,11 @@ internal class OnboardingScaffold : FrameLayout {
             featureViewCoordinates[0] + viewWidth / 2 - padding,
             element.getTopOrBottomValue(
                 messageBubbleYPosition + messageHeight / 2,
-                messageBubbleYPosition - padding //+ onboardingMessage.height + padding
+                messageBubbleYPosition - padding
             ),
             featureViewCoordinates[0] + viewWidth / 2 + padding,
             element.getTopOrBottomValue(
-                messageBubbleYPosition - 4 * padding + onboardingMessage.height,
+                messageBubbleYPosition - 4 * padding + onboardingMessageView.height,
                 messageBubbleYPosition + messageHeight / 2
             )
         )
@@ -232,6 +250,13 @@ internal class OnboardingScaffold : FrameLayout {
         )
 
         canvas.drawPath(p, pathPaint)
+
+        canvas.drawText(
+            continueHintText,
+            width / 2 - textPaint.measureText(continueHintText) / 2,
+            height - 2 * padding,
+            textPaint
+        )
     }
 
     private fun drawActionIndexIndicator(canvas: Canvas) {
@@ -252,11 +277,9 @@ internal class OnboardingScaffold : FrameLayout {
     }
 
     private fun addCloseable() {
-        val closeable = OnboardingCloseable(context)
-        addView(closeable, 70, 70)
-        closeable.translationY = 4 * padding
-        closeable.translationX = width - 4 * padding
-        closeable.onClose = {
+        closeableView.translationY = 4 * padding
+        closeableView.translationX = width - 4 * padding
+        closeableView.onClose = {
             this.onboardingDoneCallback?.invoke()
             finish()
         }
@@ -269,7 +292,7 @@ internal class OnboardingScaffold : FrameLayout {
             (h * 0.3).toInt()
         )
 
-        onboardingMessage.invalidate()
+        onboardingMessageView.invalidate()
 
         super.onSizeChanged(w, h, oldw, oldh)
     }

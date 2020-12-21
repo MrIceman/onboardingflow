@@ -165,6 +165,9 @@ internal class OnboardingScaffold : FrameLayout {
         canvas?.drawBitmap(screenBitMap, 0f, 0f, Paint())
     }
 
+    private fun getOnboardingMessageCenter() =
+        onboardingMessageView.y + onboardingMessageView.yPosOffset + onboardingMessageView.messageBubbleHeight / 2
+
     private fun drawFeatureViewRect(canvas: Canvas, action: OnboardingAction) {
         val v = action.view
         val viewHeight = v.height
@@ -200,8 +203,8 @@ internal class OnboardingScaffold : FrameLayout {
     private fun setUpMessageBubble(canvas: Canvas, action: OnboardingAction) {
         val viewHeight = action.view.height.toFloat()
         val messageBubbleYPosition = action.getTopOrBottomValue(
-            topValue = featureViewCoordinates[1] - padding - messageHeight - viewHeight / 2,
-            botValue = featureViewCoordinates[1] + 3 * viewHeight / 2 + padding
+            topValue = featureViewCoordinates[1] - 2 * padding - messageHeight,
+            botValue = featureViewCoordinates[1] + viewHeight + padding  // 3 * viewHeight / 2 + padding
         )
 
         onboardingMessageView.setUp(
@@ -229,12 +232,12 @@ internal class OnboardingScaffold : FrameLayout {
         val arcRect = RectF(
             featureViewCoordinates[0] + viewWidth / 2 - padding,
             element.getTopOrBottomValue(
-                messageBubbleYPosition + messageHeight / 2,
+                getOnboardingMessageCenter(),
                 messageBubbleYPosition - padding
             ),
             featureViewCoordinates[0] + viewWidth / 2 + padding,
             element.getTopOrBottomValue(
-                messageBubbleYPosition - 4 * padding + onboardingMessageView.height,
+                getOnboardingMessageCenter() + onboardingMessageView.messageBubbleHeight / 2 + padding,
                 messageBubbleYPosition + messageHeight / 2
             )
         )

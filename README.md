@@ -1,5 +1,7 @@
 # onboardingflow
 
+<b><font color="red">Due to the popularity of compose, as it's gonna be the standard for android development anyways, this repository is not maintained anymore</font></b>
+
 <img src="onboardingflow-animation-v1.gif" height="500" width="300"/>
 
 A library that allows you to highlight and describe any visible UI Element to your users. <br/>
